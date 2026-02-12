@@ -237,4 +237,30 @@ export class OrdersService {
       throw new InternalServerErrorException('Error updating order');
     }
   }
+
+  async remove(id: string) {
+    try {
+      const order = await this.prisma.orders.findUnique({
+        where: {
+          id,
+        },
+      });
+      if (!order) {
+        throw new NotFoundException(`Order #${id} not found`);
+      }
+      await this.prisma.orders.delete({
+        where: {
+          id,
+        },
+      });
+      return {
+        message: `Order deleted successfully`,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error deleting order');
+    }
+  }
 }

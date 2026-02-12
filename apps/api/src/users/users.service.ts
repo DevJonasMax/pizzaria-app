@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 import { UpdateUserDto } from './dtos/update.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '../../generated/prisma/client.js';
 
 @Injectable()
 export class UsersService {
@@ -26,11 +31,53 @@ export class UsersService {
   }
 
   async remove(id: string) {
-    return await Promise.resolve(`This action removes a #${id} user`);
+    try {
+      const user = await this.prisma.users.findUnique({
+        where: {
+          id,
+        },
+      });
+      if (!user) {
+        throw new NotFoundException(`User not found`);
+      }
+      await this.prisma.users.delete({
+        where: {
+          id,
+        },
+      });
+      return {
+        message: `User deleted successfully`,
+      };
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(`User not found`);
+      }
+      throw new InternalServerErrorException('Error deleting user');
+    }
   }
   async update(id: string, updateUserDto: UpdateUserDto) {
-    return await Promise.resolve(
-      `This action updates a #${id} user ${JSON.stringify(updateUserDto)}`,
-    );
+    try {
+      const user = await this.prisma.users.update({
+        where: {
+          id,
+        },
+        data: updateUserDto,
+      });
+      if (!user) {
+        throw new NotFoundException(`User not found`);
+      }
+      return user;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(`User not found`);
+      }
+      throw new InternalServerErrorException('Error updating user');
+    }
   }
 }

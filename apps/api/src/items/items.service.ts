@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { CreateItemDto } from './dtos/items.dto';
+import { CreateItemDto } from './dtos/createItems.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   NotFoundException,
   HttpException,
   InternalServerErrorException,
 } from '@nestjs/common';
-
+import { Prisma } from '../../generated/prisma/client.js';
+import { UpdateItemDto } from './dtos/updateItems.dto';
 @Injectable()
 export class ItemsService {
   constructor(private readonly prismaService: PrismaService) {}
@@ -30,10 +31,16 @@ export class ItemsService {
         },
       });
       if (!item) {
-        throw new NotFoundException(`Item #${id} not found`);
+        throw new NotFoundException(`Item not found`);
       }
       return item;
     } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(`Item not found`);
+      }
       if (error instanceof HttpException) {
         throw error;
       }
@@ -66,7 +73,7 @@ export class ItemsService {
     return newItem;
   }
 
-  async update(id: string, updateItemDto: CreateItemDto) {
+  async update(id: string, updateItemDto: UpdateItemDto) {
     try {
       const item = await this.prismaService.items.findUnique({
         where: {
@@ -100,12 +107,14 @@ export class ItemsService {
       if (!item) {
         throw new NotFoundException(`Item #${id} not found`);
       }
-      const deletedItem = await this.prismaService.items.delete({
+      await this.prismaService.items.delete({
         where: {
           id,
         },
       });
-      return deletedItem;
+      return {
+        message: `Item deleted successfully`,
+      };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

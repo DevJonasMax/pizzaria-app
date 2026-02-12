@@ -155,7 +155,7 @@ export class ProductsService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2025'
       ) {
-        throw new NotFoundException(`Product with ID ${id} not found`);
+        throw new NotFoundException(`Product not found`);
       }
       throw new InternalServerErrorException('Error deleting product');
     }
