@@ -8,6 +8,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { CreateProductDto } from './dtos/crete-product.dto';
 import { UpdateProductDto } from './dtos/update-products.dtos';
@@ -16,8 +17,8 @@ import { UpdateProductDto } from './dtos/update-products.dtos';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  findAll(@Query('disabled') disabled?: boolean) {
+    return this.productsService.findAll(disabled);
   }
   @Get(':id')
   findOne(@Param('id') id: string) {

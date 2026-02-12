@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsBoolean } from 'class-validator';
 import { MinLength } from 'class-validator';
 import { IsString } from 'class-validator';
 
@@ -15,5 +15,11 @@ export class CreateProductDto {
   description: string;
   @IsNotEmpty()
   @IsString()
+  banner: string;
+  @IsNotEmpty()
+  @IsString()
   categoryId: string;
+  @IsNotEmpty()
+  @IsBoolean()
+  disabled?: boolean;
 }

@@ -11,7 +11,7 @@ import {
 export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
   async findAll(draft?: string | boolean) {
-    const isDraft = String(draft) === 'true';
+    const isDraft = draft === undefined ? undefined : String(draft) === 'true';
     try {
       const orders = await this.prisma.orders.findMany({
         where: {

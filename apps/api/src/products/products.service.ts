@@ -13,9 +13,16 @@ import {
 @Injectable()
 export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
-  async findAll() {
+  async findAll(disabled?: string | boolean) {
     try {
-      const products = await this.prisma.products.findMany();
+      const disabledFilter =
+        disabled === undefined ? undefined : String(disabled) === 'true';
+      console.log(disabledFilter);
+      const products = await this.prisma.products.findMany({
+        where: {
+          disabled: disabledFilter,
+        },
+      });
       return products;
     } catch (error) {
       if (error instanceof HttpException) {
@@ -39,7 +46,7 @@ export class ProductsService {
         },
       });
       if (!product) {
-        throw new NotFoundException(`Product with ID ${id} not found`);
+        throw new NotFoundException(`Product not found`);
       }
       return product;
     } catch (error) {
@@ -78,6 +85,15 @@ export class ProductsService {
   }
   async create(createProductDto: CreateProductDto) {
     try {
+      const categoryExists = await this.prisma.category.findUnique({
+        where: {
+          id: createProductDto.categoryId,
+        },
+      });
+
+      if (!categoryExists) {
+        throw new NotFoundException(`Category not found`);
+      }
       const product = await this.prisma.products.create({
         data: createProductDto,
       });
