@@ -1,7 +1,7 @@
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProductDto } from './dtos/crete-product.dto';
 import { UpdateProductDto } from './dtos/update-products.dtos';
-import { Prisma } from '../../generated/prisma/client.js';
+import { Prisma } from '../../generated/prisma/client';
 import {
   Injectable,
   InternalServerErrorException,

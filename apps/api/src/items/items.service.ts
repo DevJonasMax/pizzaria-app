@@ -6,7 +6,7 @@ import {
   HttpException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Prisma } from '../../generated/prisma/client.js';
+import { Prisma } from '../../generated/prisma/client';
 import { UpdateItemDto } from './dtos/updateItems.dto';
 @Injectable()
 export class ItemsService {

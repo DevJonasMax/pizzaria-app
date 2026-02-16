@@ -6,11 +6,12 @@ import {
 
 import { UpdateUserDto } from './dtos/update.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '../../generated/prisma/client.js';
+import { Prisma } from '../../generated/prisma/client';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
+
   async findAll() {
     try {
       const users = await this.prisma.users.findMany({

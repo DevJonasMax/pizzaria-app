@@ -1,13 +1,18 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthDto } from './dtos/auth.dto';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from 'src/users/dtos/createUsers.dto';
+import { JwtService } from '@nestjs/jwt';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
-  async login({ email, password }: AuthDto) {
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+  ) {}
+  async login({ email, password }: AuthDto, res: Response) {
     const user = await this.prisma.users.findFirst({
       where: {
         email,
@@ -20,7 +25,14 @@ export class AuthService {
     if (!passwordMatch) {
       throw new UnauthorizedException('Credentials are not valid');
     }
-    return { message: 'Login successful' };
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    const access_token = await this.jwtService.signAsync(payload);
+    res.cookie('access_token', access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+    });
+    return { message: 'Login successful', access_token };
   }
 
   async signup({ email, name, password }: CreateUserDto) {
